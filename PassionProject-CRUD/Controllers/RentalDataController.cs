@@ -8,8 +8,9 @@ using System.Net;
 using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
-using PassionProject_CRUD.Migrations;
 using PassionProject_CRUD.Models;
+using System.Diagnostics;
+using PassionProject_CRUD.Migrations;
 
 namespace PassionProject_CRUD.Controllers
 {
@@ -17,7 +18,8 @@ namespace PassionProject_CRUD.Controllers
     {
         private ApplicationDbContext db = new ApplicationDbContext();
 
-        // GET: api/RentalData/ListRental
+        // GET: api/RentalData/ListRentals
+        //curl https://localhost:44395/api/rentaldata/listrentals
         [HttpGet]
         public IEnumerable<RentalDto> ListRentals()
         {
@@ -43,6 +45,7 @@ namespace PassionProject_CRUD.Controllers
         }
 
         // GET: api/RentalData/FindRental/5
+        //curl https://localhost:44395/api/rentaldata/findrental/33
         [ResponseType(typeof(Rental))]
         [HttpGet]
         public IHttpActionResult FindRental(int id)
@@ -72,17 +75,27 @@ namespace PassionProject_CRUD.Controllers
         }
 
         // POST: api/RentalData/UpdateRental/5
+        //curl -d @rental.json -H "Content-type:application/json" "https://localhost:44395/api/rentaldata/updaterental/31"
         [ResponseType(typeof(void))]
         [HttpPost]
         public IHttpActionResult UpdateRental(int id, Rental rental)
         {
+            Debug.WriteLine("I have reached the update rental method!");
             if (!ModelState.IsValid)
             {
+                Debug.WriteLine("Model State is invalid");
                 return BadRequest(ModelState);
             }
 
             if (id != rental.RentalId)
             {
+                Debug.WriteLine("ID mismatch");
+                Debug.WriteLine("GET parameter" + id);
+                Debug.WriteLine("POST parameter" + rental.RentalId);
+                Debug.WriteLine("POST parameter" + rental.FirstName);
+                Debug.WriteLine("POST parameter" + rental.LastName);
+                Debug.WriteLine("POST parameter" + rental.PuchaseDate);
+                Debug.WriteLine("POST parameter" + rental.ReturnDate);
                 return BadRequest();
             }
 
@@ -96,6 +109,7 @@ namespace PassionProject_CRUD.Controllers
             {
                 if (!RentalExists(id))
                 {
+                    Debug.WriteLine("Rental not found");
                     return NotFound();
                 }
                 else
@@ -104,10 +118,12 @@ namespace PassionProject_CRUD.Controllers
                 }
             }
 
+            Debug.WriteLine("None of the conditions triggered");
             return StatusCode(HttpStatusCode.NoContent);
         }
 
         // POST: api/RentalData/AddRental
+        //curl -d @rental.json -H "Content-type:application/json" https://localhost:44395/api/rentaldata/addrental
         [ResponseType(typeof(Rental))]
         [HttpPost]
         public IHttpActionResult AddRental(Rental rental)
@@ -124,6 +140,7 @@ namespace PassionProject_CRUD.Controllers
         }
 
         // POST: api/RentalData/DeleteRental/5
+        //curl -d "" https://localhost:44395/api/rentaldata/deleterental/33
         [ResponseType(typeof(Rental))]
         [HttpPost]
 
@@ -138,7 +155,7 @@ namespace PassionProject_CRUD.Controllers
             db.Rental.Remove(rental);
             db.SaveChanges();
 
-            return Ok(rental);
+            return Ok();
         }
 
         protected override void Dispose(bool disposing)

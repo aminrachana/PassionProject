@@ -9,6 +9,7 @@ using System.Net.Http;
 using System.Web.Http;
 using System.Web.Http.Description;
 using PassionProject_CRUD.Models;
+using System.Diagnostics;
 
 namespace PassionProject_CRUD.Controllers
 {
@@ -17,6 +18,7 @@ namespace PassionProject_CRUD.Controllers
         private ApplicationDbContext db = new ApplicationDbContext();
 
         // GET: api/MovieData/ListMovies
+        //curl https://localhost:44395/api/moviedata/listmovies
         [HttpGet]
         public IEnumerable<MovieDto> ListMovies()
         {
@@ -38,31 +40,53 @@ namespace PassionProject_CRUD.Controllers
         }
 
         // GET: api/MovieData/FindMovie/5
+        //curl https://localhost:44395/api/moviedata/findmovie/4
         [ResponseType(typeof(Movie))]
         [HttpGet]
         public IHttpActionResult FindMovie(int id)
         {
             Movie movie = db.Movies.Find(id);
+            MovieDto MovieDto = new MovieDto()
+            {
+                MovieId = movie.MovieId,
+                MovieName = movie.MovieName,
+                MovieGenre = movie.MovieGenre,
+                MovieDate = movie.MovieDate,
+                MovieCost = movie.MovieCost,
+                Moviedescription = movie.Moviedescription
+            };
+
             if (movie == null)
             {
                 return NotFound();
             }
 
-            return Ok(movie);
+            return Ok(MovieDto);
         }
 
         // POST: api/MovieData/UpdateMovie/5
+        //curl -d @movie.json -H "Content-type:application/json" "https://localhost:44395/api/moviedata/updatemovie/11"
         [ResponseType(typeof(void))]
         [HttpPost]
         public IHttpActionResult UpdateMovie(int id, Movie movie)
         {
+            Debug.WriteLine("I have reached the update movie method!");
             if (!ModelState.IsValid)
             {
+                Debug.WriteLine("Model State is invalid");
                 return BadRequest(ModelState);
             }
 
             if (id != movie.MovieId)
             {
+                Debug.WriteLine("ID mismatch");
+                Debug.WriteLine("GET parameter" + id);
+                Debug.WriteLine("POST parameter" + movie.MovieId);
+                Debug.WriteLine("POST parameter" + movie.MovieName);
+                Debug.WriteLine("POST parameter" + movie.MovieGenre);
+                Debug.WriteLine("POST parameter" + movie.MovieDate);
+                Debug.WriteLine("POST parameter" + movie.MovieCost);
+                Debug.WriteLine("POST parameter" + movie.Moviedescription);
                 return BadRequest();
             }
 
@@ -76,6 +100,7 @@ namespace PassionProject_CRUD.Controllers
             {
                 if (!MovieExists(id))
                 {
+                    Debug.WriteLine("Movie not found");
                     return NotFound();
                 }
                 else
@@ -84,10 +109,12 @@ namespace PassionProject_CRUD.Controllers
                 }
             }
 
+            Debug.WriteLine("None of the conditions triggered");
             return StatusCode(HttpStatusCode.NoContent);
         }
 
         // POST: api/MovieData/AddMovie
+        //curl -d @movie.json -H "Content-type:application/json" https://localhost:44395/api/moviedata/addmovie
         [ResponseType(typeof(Movie))]
         [HttpPost]
         public IHttpActionResult AddMovie(Movie movie)
@@ -104,6 +131,7 @@ namespace PassionProject_CRUD.Controllers
         }
 
         // POST: api/MovieData/DeleteMovie/5
+        //curl -d "" https://localhost:44395/api/moviedata/deletemovie/8
         [ResponseType(typeof(Movie))]
         [HttpPost]
 
